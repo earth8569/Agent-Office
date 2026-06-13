@@ -5,7 +5,20 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Mapping, Protocol, Sequence
 
+from agent_office.env import load_dotenv
 from agent_office.models import Candle, ExchangePosition, ExchangeState, ExchangeStopOrder, Side
+
+
+@dataclass(frozen=True)
+class DemoTradeResult:
+    symbol: str
+    side: Side
+    amount: float
+    last_price: float
+    stop_loss: float
+    leverage: float
+    order_id: str
+    raw: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -17,6 +30,8 @@ class OkxCredentials:
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] | None = None) -> "OkxCredentials | None":
+        if environ is None:
+            load_dotenv()
         env = environ or os.environ
         api_key = env.get("OKX_API_KEY", "").strip()
         api_secret = env.get("OKX_API_SECRET", "").strip()
@@ -72,6 +87,65 @@ class OkxDemoAdapter:
             positions=positions,
             stop_orders=stop_orders,
             raw_balance=_scrub_balance(balance),
+        )
+
+    def place_demo_market_with_stop(
+        self,
+        symbol: str,
+        side: Side,
+        amount: float,
+        leverage: float,
+        stop_pct: float,
+    ) -> DemoTradeResult:
+        if not self.credentials.demo:
+            raise RuntimeError("refusing to place order unless OKX_DEMO=1")
+        if amount <= 0:
+            raise ValueError("amount must be positive")
+        if leverage <= 0 or leverage > 5:
+            raise ValueError("demo trade leverage must be >0 and <=5")
+        if stop_pct <= 0 or stop_pct > 0.20:
+            raise ValueError("stop_pct must be >0 and <=0.20")
+
+        self.exchange.load_markets()
+        try:
+            self.exchange.set_leverage(int(leverage), symbol, {"mgnMode": "isolated"})
+        except Exception:
+            # Some demo accounts already have leverage/mode fixed. Order params still enforce isolated mode.
+            pass
+
+        ticker = self.exchange.fetch_ticker(symbol)
+        last_price = _float_value(ticker.get("last"), ticker.get("close"), default=0.0)
+        if last_price <= 0:
+            raise RuntimeError("unable to fetch last price for demo trade")
+
+        stop_loss = last_price * (1 - stop_pct) if side == Side.LONG else last_price * (1 + stop_pct)
+        order_side = "buy" if side == Side.LONG else "sell"
+        order = self.exchange.create_order(
+            symbol=symbol,
+            type="market",
+            side=order_side,
+            amount=amount,
+            price=None,
+            params={
+                "tdMode": "isolated",
+                "attachAlgoOrds": [
+                    {
+                        "slTriggerPx": _format_price(stop_loss),
+                        "slOrdPx": "-1",
+                        "slTriggerPxType": "last",
+                    }
+                ],
+            },
+        )
+        return DemoTradeResult(
+            symbol=symbol,
+            side=side,
+            amount=amount,
+            last_price=last_price,
+            stop_loss=stop_loss,
+            leverage=leverage,
+            order_id=str(order.get("id") or order.get("info", {}).get("ordId") or ""),
+            raw=_scrub_mapping(order),
         )
 
     def fetch_positions(self, symbols: Sequence[str]) -> tuple[ExchangePosition, ...]:
@@ -231,6 +305,10 @@ def _extract_equity_usdt(balance: dict[str, Any]) -> float:
             if value is not None:
                 return value
     raise RuntimeError("unable to extract USDT equity from OKX balance")
+
+
+def _format_price(value: float) -> str:
+    return f"{value:.8f}".rstrip("0").rstrip(".")
 
 
 def _float_value(*values: object, default: float) -> float:

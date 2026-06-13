@@ -18,7 +18,10 @@ python -m unittest discover -s tests
 python -m agent_office.cli init --db data\paper.sqlite
 python -m agent_office.cli smoke-cycle --db data\paper.sqlite
 python -m agent_office.cli web --db data\paper.sqlite
+python -m agent_office.cli backtest --start 2026-01-01 --end 2026-04-01 --cache-dir data\ohlcv_cache
 ```
+
+Backtest OHLCV CSV files are cached in `data/ohlcv_cache` so repeat runs do not refetch candles. SQLite runtime databases stay local under `data/*.sqlite`.
 
 Open `http://127.0.0.1:8787` for the operator console. It shows each recorded
 agent/runtime/risk/execution action from the SQLite audit log and refreshes
