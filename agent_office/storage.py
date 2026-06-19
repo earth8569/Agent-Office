@@ -42,7 +42,8 @@ class SQLiteStore:
                     leverage REAL NOT NULL,
                     quantity REAL NOT NULL,
                     opened_at TEXT NOT NULL,
-                    stop_order_id TEXT NOT NULL
+                    stop_order_id TEXT NOT NULL,
+                    take_profit REAL
                 )
                 """
             )
@@ -57,6 +58,10 @@ class SQLiteStore:
                 )
                 """
             )
+            columns = {row["name"] for row in conn.execute("PRAGMA table_info(positions)")}
+            if "take_profit" not in columns:
+                conn.execute("ALTER TABLE positions ADD COLUMN take_profit REAL")
+
             existing = conn.execute("SELECT 1 FROM equity_state WHERE id = 1").fetchone()
             if existing is None:
                 conn.execute(
@@ -85,6 +90,7 @@ class SQLiteStore:
                     quantity=position["quantity"],
                     opened_at=datetime.fromisoformat(position["opened_at"]),
                     stop_order_id=position["stop_order_id"],
+                    take_profit=position["take_profit"],
                 )
                 for position in conn.execute("SELECT * FROM positions ORDER BY opened_at")
             )
@@ -115,9 +121,9 @@ class SQLiteStore:
                 """
                 INSERT INTO positions (
                     symbol, side, entry_price, stop_loss, notional_usdt,
-                    leverage, quantity, opened_at, stop_order_id
+                    leverage, quantity, opened_at, stop_order_id, take_profit
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     (
@@ -130,6 +136,7 @@ class SQLiteStore:
                         position.quantity,
                         position.opened_at.isoformat(),
                         position.stop_order_id,
+                        position.take_profit,
                     )
                     for position in account.positions
                 ],

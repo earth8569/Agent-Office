@@ -1,0 +1,30 @@
+# Agent Office runtime config.
+# Symbols use OKX/CCXT perpetual format: BASE/QUOTE:SETTLE.
+# This default watchlist is filtered from 2019-2025 backtests for stronger multi-year expectancy.
+# A live "top liquidation" ranking needs an external liquidation data provider.
+
+trading_mode = "paper"
+watchlist = [
+  "BTC/USDT:USDT",
+  "ADA/USDT:USDT",
+  "DOGE/USDT:USDT",
+  "SOL/USDT:USDT",
+  "XRP/USDT:USDT",
+]
+
+db_path = "data/agent_office.sqlite"
+starting_equity_usdt = 10000.0
+default_leverage = 2.0
+
+[risk_limits]
+max_risk_per_trade_pct = 0.01
+max_leverage = 5.0
+max_concurrent_positions = 3
+max_total_notional_to_equity = 3.0
+daily_loss_limit_pct = 0.05
+max_drawdown_pct = 0.20
+
+[strategy]
+stop_atr_multiple = 2.0
+min_stop_distance_pct = 0.005
+take_profit_r_multiple = 1.5

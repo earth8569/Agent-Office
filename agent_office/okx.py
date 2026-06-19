@@ -16,6 +16,7 @@ class DemoTradeResult:
     amount: float
     last_price: float
     stop_loss: float
+    take_profit: float | None
     leverage: float
     order_id: str
     raw: dict[str, Any]
@@ -96,6 +97,7 @@ class OkxDemoAdapter:
         amount: float,
         leverage: float,
         stop_pct: float,
+        take_profit_pct: float | None = None,
     ) -> DemoTradeResult:
         if not self.credentials.demo:
             raise RuntimeError("refusing to place order unless OKX_DEMO=1")
@@ -105,10 +107,13 @@ class OkxDemoAdapter:
             raise ValueError("demo trade leverage must be >0 and <=5")
         if stop_pct <= 0 or stop_pct > 0.20:
             raise ValueError("stop_pct must be >0 and <=0.20")
+        if take_profit_pct is not None and (take_profit_pct <= 0 or take_profit_pct > 0.50):
+            raise ValueError("take_profit_pct must be >0 and <=0.50")
 
         self.exchange.load_markets()
+        position_side = _position_side_for_order(self.exchange, side)
         try:
-            self.exchange.set_leverage(int(leverage), symbol, {"mgnMode": "isolated"})
+            self.exchange.set_leverage(int(leverage), symbol, {"mgnMode": "isolated", "posSide": position_side})
         except Exception:
             # Some demo accounts already have leverage/mode fixed. Order params still enforce isolated mode.
             pass
@@ -119,6 +124,22 @@ class OkxDemoAdapter:
             raise RuntimeError("unable to fetch last price for demo trade")
 
         stop_loss = last_price * (1 - stop_pct) if side == Side.LONG else last_price * (1 + stop_pct)
+        take_profit = None
+        if take_profit_pct is not None:
+            take_profit = last_price * (1 + take_profit_pct) if side == Side.LONG else last_price * (1 - take_profit_pct)
+        attached_order: dict[str, Any] = {
+            "slTriggerPx": _format_price(stop_loss),
+            "slOrdPx": "-1",
+            "slTriggerPxType": "last",
+        }
+        if take_profit is not None:
+            attached_order.update(
+                {
+                    "tpTriggerPx": _format_price(take_profit),
+                    "tpOrdPx": "-1",
+                    "tpTriggerPxType": "last",
+                }
+            )
         order_side = "buy" if side == Side.LONG else "sell"
         order = self.exchange.create_order(
             symbol=symbol,
@@ -128,12 +149,11 @@ class OkxDemoAdapter:
             price=None,
             params={
                 "tdMode": "isolated",
+                "marginMode": "isolated",
+                "positionSide": position_side,
+                "hedged": position_side != "net",
                 "attachAlgoOrds": [
-                    {
-                        "slTriggerPx": _format_price(stop_loss),
-                        "slOrdPx": "-1",
-                        "slTriggerPxType": "last",
-                    }
+                    attached_order
                 ],
             },
         )
@@ -143,11 +163,41 @@ class OkxDemoAdapter:
             amount=amount,
             last_price=last_price,
             stop_loss=stop_loss,
+            take_profit=take_profit,
             leverage=leverage,
             order_id=str(order.get("id") or order.get("info", {}).get("ordId") or ""),
             raw=_scrub_mapping(order),
         )
 
+    def last_price(self, symbol: str) -> float:
+        ticker = self.exchange.fetch_ticker(symbol)
+        return _float_value(ticker.get("last"), ticker.get("close"), default=0.0)
+
+    def contract_amount_for_notional(self, symbol: str, notional_usdt: float, reference_price: float) -> float:
+        if notional_usdt <= 0:
+            raise ValueError("notional_usdt must be positive")
+        if reference_price <= 0:
+            raise ValueError("reference_price must be positive")
+        self.exchange.load_markets()
+        market = self.exchange.market(symbol)
+        info = market.get("info", {}) if isinstance(market.get("info"), dict) else {}
+        contract_size = _float_value(market.get("contractSize"), info.get("ctVal"), default=1.0)
+        if contract_size <= 0:
+            contract_size = 1.0
+        raw_amount = max(1.0, notional_usdt / (reference_price * contract_size))
+        try:
+            return float(self.exchange.amount_to_precision(symbol, raw_amount))
+        except Exception:
+            return raw_amount
+
+    def contract_notional_usdt(self, symbol: str, amount: float, reference_price: float) -> float:
+        self.exchange.load_markets()
+        market = self.exchange.market(symbol)
+        info = market.get("info", {}) if isinstance(market.get("info"), dict) else {}
+        contract_size = _float_value(market.get("contractSize"), info.get("ctVal"), default=1.0)
+        if contract_size <= 0:
+            contract_size = 1.0
+        return amount * contract_size * reference_price
     def fetch_positions(self, symbols: Sequence[str]) -> tuple[ExchangePosition, ...]:
         positions = self.exchange.fetch_positions(list(symbols))
         parsed: list[ExchangePosition] = []
@@ -206,6 +256,21 @@ class OkxDemoAdapter:
         return list(data)
 
 
+def _position_side_for_order(exchange: Any, side: Side) -> str:
+    method = getattr(exchange, "private_get_account_config", None)
+    if method is None:
+        return "net"
+    try:
+        response = method()
+    except Exception:
+        return "net"
+    data = response.get("data", []) if isinstance(response, dict) else []
+    config = data[0] if data and isinstance(data[0], dict) else {}
+    if config.get("posMode") == "long_short_mode":
+        return "long" if side == Side.LONG else "short"
+    return "net"
+
+
 def okx_demo_test_enabled(environ: Mapping[str, str] | None = None) -> bool:
     env = environ or os.environ
     credentials = OkxCredentials.from_env(env)
@@ -257,11 +322,13 @@ def _parse_side(*values: object) -> Side:
 
 def _parse_stop_order(order: dict[str, Any]) -> ExchangeStopOrder:
     info = order.get("info", {}) if isinstance(order.get("info"), dict) else {}
-    symbol = _normalize_symbol(str(order.get("symbol") or info.get("instId") or ""))
-    order_id = str(order.get("id") or info.get("algoId") or info.get("ordId") or "")
+    symbol = _normalize_symbol(str(order.get("symbol") or order.get("instId") or info.get("instId") or ""))
+    order_id = str(order.get("id") or order.get("algoId") or order.get("ordId") or info.get("algoId") or info.get("ordId") or "")
     stop_price = _optional_float(
         order.get("stopPrice"),
         order.get("triggerPrice"),
+        order.get("slTriggerPx"),
+        order.get("triggerPx"),
         info.get("slTriggerPx"),
         info.get("triggerPx"),
     )
@@ -270,12 +337,14 @@ def _parse_stop_order(order: dict[str, Any]) -> ExchangeStopOrder:
 
 def _looks_like_stop_order(order: dict[str, Any]) -> bool:
     info = order.get("info", {}) if isinstance(order.get("info"), dict) else {}
-    order_type = str(order.get("type") or info.get("ordType") or "").lower()
+    order_type = str(order.get("type") or order.get("ordType") or info.get("ordType") or "").lower()
     return any(
         value
         for value in (
             order.get("stopPrice"),
             order.get("triggerPrice"),
+            order.get("slTriggerPx"),
+            order.get("triggerPx"),
             info.get("slTriggerPx"),
             info.get("triggerPx"),
         )

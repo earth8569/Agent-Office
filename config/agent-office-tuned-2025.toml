@@ -1,0 +1,32 @@
+# Tuned from 2025 10-symbol backtest.
+# Goal: improve net PnL while reducing drawdown versus current config.
+
+trading_mode = "paper"
+watchlist = [
+  "BTC/USDT:USDT",
+  "ETH/USDT:USDT",
+  "SOL/USDT:USDT",
+  "XRP/USDT:USDT",
+  "DOGE/USDT:USDT",
+  "BNB/USDT:USDT",
+  "SUI/USDT:USDT",
+  "ADA/USDT:USDT",
+  "AVAX/USDT:USDT",
+  "LINK/USDT:USDT",
+]
+
+db_path = "data/agent_office.sqlite"
+starting_equity_usdt = 10000.0
+default_leverage = 2.0
+
+[risk_limits]
+max_risk_per_trade_pct = 0.01
+max_leverage = 5.0
+max_concurrent_positions = 3
+max_total_notional_to_equity = 3.0
+daily_loss_limit_pct = 0.05
+max_drawdown_pct = 0.20
+
+[strategy]
+stop_atr_multiple = 3.0
+min_stop_distance_pct = 0.005

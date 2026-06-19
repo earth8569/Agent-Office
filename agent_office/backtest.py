@@ -22,6 +22,7 @@ class BacktestTrade:
     entry_price: float
     exit_price: float
     stop_loss: float
+    take_profit: float
     notional_usdt: float
     gross_pnl_usdt: float
     fees_usdt: float
@@ -58,6 +59,7 @@ class _OpenPosition:
     side: Side
     entry_price: float
     stop_loss: float
+    take_profit: float
     notional_usdt: float
     leverage: float
     quantity: float
@@ -114,6 +116,17 @@ class RuleBaselineBacktester:
                         del open_positions[symbol]
                         daily_pnl[cycle_day] = daily_value
                         continue
+                    if self._take_profit_hit(position, candle):
+                        trade = self._close_trade(position, candle_time, position.take_profit, "take_profit")
+                        trades.append(trade)
+                        equity += trade.net_pnl_usdt
+                        daily_value += trade.net_pnl_usdt
+                        peak_equity = max(peak_equity, equity)
+                        max_drawdown = max(max_drawdown, _drawdown(equity, peak_equity))
+                        equity_curve.append((candle_time.isoformat(), equity))
+                        del open_positions[symbol]
+                        daily_pnl[cycle_day] = daily_value
+                        continue
 
                 if index < 60:
                     continue
@@ -149,7 +162,7 @@ class RuleBaselineBacktester:
                     daily_pnl[cycle_day] = daily_value
                     continue
 
-                open_positions[symbol] = _position_from_intent(signal, candle_time)
+                open_positions[symbol] = _position_from_intent(signal, candle_time, self.config.strategy.take_profit_r_multiple)
                 daily_pnl[cycle_day] = daily_value
 
         for symbol, position in list(open_positions.items()):
@@ -220,6 +233,7 @@ class RuleBaselineBacktester:
             entry_price=position.entry_price,
             exit_price=exit_price,
             stop_loss=position.stop_loss,
+            take_profit=position.take_profit,
             notional_usdt=position.notional_usdt,
             gross_pnl_usdt=gross_pnl,
             fees_usdt=fees,
@@ -247,6 +261,12 @@ class RuleBaselineBacktester:
             return candle.low <= position.stop_loss
         return candle.high >= position.stop_loss
 
+    @staticmethod
+    def _take_profit_hit(position: _OpenPosition, candle: Candle) -> bool:
+        if position.side == Side.LONG:
+            return candle.high >= position.take_profit
+        return candle.low <= position.take_profit
+
 
 def fetch_okx_public_ohlcv(
     symbol: str,
@@ -254,13 +274,14 @@ def fetch_okx_public_ohlcv(
     start: datetime,
     end: datetime,
     limit: int = 100,
+    market_type: str = "swap",
 ) -> list[Candle]:
     try:
         import ccxt  # type: ignore[import-not-found]
     except ImportError as exc:
         raise RuntimeError("ccxt not installed. Run `python -m pip install -e .`.") from exc
 
-    exchange = ccxt.okx({"enableRateLimit": True, "options": {"defaultType": "swap"}})
+    exchange = ccxt.okx({"enableRateLimit": True, "options": {"defaultType": market_type}})
     timeframe_ms = _timeframe_ms(timeframe)
     since = _to_ms(start)
     end_ms = _to_ms(end)
@@ -289,13 +310,44 @@ def load_or_fetch_okx_public_ohlcv(
     end: datetime,
     cache_dir: Path = Path("data/ohlcv_cache"),
 ) -> list[Candle]:
+    return load_or_fetch_okx_public_ohlcv_with_source(symbol, timeframe, start, end, cache_dir)[0]
+
+
+def load_or_fetch_okx_public_ohlcv_with_source(
+    symbol: str,
+    timeframe: str,
+    start: datetime,
+    end: datetime,
+    cache_dir: Path = Path("data/ohlcv_cache"),
+) -> tuple[list[Candle], str]:
     path = ohlcv_cache_path(cache_dir, symbol, timeframe, start, end)
     if path.exists():
-        return read_ohlcv_csv(path)
+        return read_ohlcv_csv(path), "csv_cache"
 
-    candles = fetch_okx_public_ohlcv(symbol, timeframe, start, end)
+    candles = _try_fetch_okx_public_ohlcv(symbol, timeframe, start, end)
+    source = "okx_swap_fetch_saved_csv"
+    if not candles:
+        candles = _try_fetch_okx_public_ohlcv(_spot_symbol(symbol), timeframe, start, end, market_type="spot")
+        source = "okx_spot_proxy_saved_csv" if candles else "okx_fetch_empty_saved_csv"
     write_ohlcv_csv(path, candles)
-    return candles
+    return candles, source
+
+
+def _try_fetch_okx_public_ohlcv(
+    symbol: str,
+    timeframe: str,
+    start: datetime,
+    end: datetime,
+    market_type: str = "swap",
+) -> list[Candle]:
+    try:
+        return fetch_okx_public_ohlcv(symbol, timeframe, start, end, market_type=market_type)
+    except Exception:
+        return []
+
+
+def _spot_symbol(symbol: str) -> str:
+    return symbol.split(":", 1)[0]
 
 
 def ohlcv_cache_path(
@@ -370,6 +422,7 @@ def result_summary(result: BacktestResult, trade_limit: int = 12) -> dict[str, A
         "profit_factor": None if result.profit_factor is None else round(result.profit_factor, 2),
         "risk_rejections": result.risk_rejections,
         "cycles": result.cycles,
+        "per_symbol": _per_symbol_summary(result.trades),
         "equity_curve": [{"time": point[0], "equity": round(point[1], 2)} for point in result.equity_curve],
         "sample_trades": [
             {
@@ -379,6 +432,8 @@ def result_summary(result: BacktestResult, trade_limit: int = 12) -> dict[str, A
                 "closed_at": trade.closed_at.isoformat(),
                 "entry": round(trade.entry_price, 4),
                 "exit": round(trade.exit_price, 4),
+                "stop_loss": round(trade.stop_loss, 4),
+                "take_profit": round(trade.take_profit, 4),
                 "net_pnl_usdt": round(trade.net_pnl_usdt, 2),
                 "exit_reason": trade.exit_reason,
             }
@@ -387,12 +442,61 @@ def result_summary(result: BacktestResult, trade_limit: int = 12) -> dict[str, A
     }
 
 
-def _position_from_intent(intent: TradeIntent, opened_at: datetime) -> _OpenPosition:
+def _per_symbol_summary(trades: Sequence[BacktestTrade]) -> dict[str, dict[str, Any]]:
+    symbols = sorted({trade.symbol for trade in trades})
+    summary: dict[str, dict[str, Any]] = {}
+
+    for symbol in symbols:
+        symbol_trades = [trade for trade in trades if trade.symbol == symbol]
+        wins = [trade for trade in symbol_trades if trade.net_pnl_usdt > 0]
+        losses = [trade for trade in symbol_trades if trade.net_pnl_usdt < 0]
+        gross_profit = sum(trade.net_pnl_usdt for trade in wins)
+        gross_loss = abs(sum(trade.net_pnl_usdt for trade in losses))
+        net_pnl = sum(trade.net_pnl_usdt for trade in symbol_trades)
+        trade_count = len(symbol_trades)
+        profit_factor = (gross_profit / gross_loss) if gross_loss else None
+        summary[symbol] = {
+            "trades": trade_count,
+            "wins": len(wins),
+            "losses": len(losses),
+            "win_rate_pct": round((len(wins) / trade_count * 100) if trade_count else 0.0, 2),
+            "gross_pnl_usdt": round(sum(trade.gross_pnl_usdt for trade in symbol_trades), 2),
+            "fees_usdt": round(sum(trade.fees_usdt for trade in symbol_trades), 2),
+            "net_pnl_usdt": round(net_pnl, 2),
+            "profit_factor": None if profit_factor is None else round(profit_factor, 2),
+            "avg_trade_usdt": round(net_pnl / trade_count, 2) if trade_count else 0.0,
+            "best_trade_usdt": round(max((trade.net_pnl_usdt for trade in symbol_trades), default=0.0), 2),
+            "worst_trade_usdt": round(min((trade.net_pnl_usdt for trade in symbol_trades), default=0.0), 2),
+            "classification": _symbol_classification(net_pnl, profit_factor, trade_count),
+        }
+
+    return summary
+
+
+def _symbol_classification(net_pnl: float, profit_factor: float | None, trades: int) -> str:
+    if trades == 0:
+        return "NO_TRADES"
+    if net_pnl > 0 and (profit_factor is None or profit_factor >= 1.5):
+        return "STRONG_KEEP"
+    if net_pnl > 0:
+        return "POSITIVE_WATCH"
+    if abs(net_pnl) < 25:
+        return "FLAT"
+    return "WEAK_REMOVE_OR_TUNE"
+
+def _position_from_intent(intent: TradeIntent, opened_at: datetime, take_profit_r_multiple: float) -> _OpenPosition:
+    risk_distance = abs(intent.entry_price - intent.stop_loss)
+    if intent.side == Side.LONG:
+        take_profit = intent.entry_price + (risk_distance * take_profit_r_multiple)
+    else:
+        take_profit = intent.entry_price - (risk_distance * take_profit_r_multiple)
+
     return _OpenPosition(
         symbol=intent.symbol,
         side=intent.side,
         entry_price=intent.entry_price,
         stop_loss=intent.stop_loss,
+        take_profit=take_profit,
         notional_usdt=intent.notional_usdt,
         leverage=intent.leverage,
         quantity=intent.notional_usdt / intent.entry_price,
@@ -453,3 +557,4 @@ def _parse_ohlcv(row: Sequence[float]) -> Candle:
         close=float(row[4]),
         volume=float(row[5]),
     )
+

@@ -101,6 +101,7 @@ class Position:
     quantity: float
     opened_at: datetime
     stop_order_id: str
+    take_profit: float | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

@@ -12,13 +12,13 @@ class RuleBasedBaseline:
 
     def decide(self, snapshot: IndicatorSnapshot, account: AccountState) -> TradeIntent | None:
         if snapshot.trend == "bullish" and snapshot.daily_trend != "bearish" and snapshot.macd_hist > 0:
-            stop = max(snapshot.support, snapshot.close - (2 * snapshot.atr))
-            stop = min(stop, snapshot.close * 0.995)
+            stop = max(snapshot.support, snapshot.close - (self.config.strategy.stop_atr_multiple * snapshot.atr))
+            stop = min(stop, snapshot.close * (1 - self.config.strategy.min_stop_distance_pct))
             return self._build_intent(snapshot, account, Side.LONG, stop, "Bullish 4h trend with non-bearish 1d bias.")
 
         if snapshot.trend == "bearish" and snapshot.daily_trend != "bullish" and snapshot.macd_hist < 0:
-            stop = min(snapshot.resistance, snapshot.close + (2 * snapshot.atr))
-            stop = max(stop, snapshot.close * 1.005)
+            stop = min(snapshot.resistance, snapshot.close + (self.config.strategy.stop_atr_multiple * snapshot.atr))
+            stop = max(stop, snapshot.close * (1 + self.config.strategy.min_stop_distance_pct))
             return self._build_intent(snapshot, account, Side.SHORT, stop, "Bearish 4h trend with non-bullish 1d bias.")
 
         return None

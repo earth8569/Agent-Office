@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Grid Raw Walk-Forward</title>
+  <title>OKX Demo Agent Office</title>
   <style>
     :root {
       --ink: #151515;
@@ -696,6 +696,46 @@
         #16db93 10px,
         #16db93 20px
       );
+    }
+
+    .chart-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 10px;
+    }
+
+    .chart-mode {
+      border: 3px solid var(--line);
+      background: #fffdf1;
+      color: #0b1020;
+      box-shadow: 3px 3px 0 rgba(11, 16, 32, 0.24);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      min-height: 34px;
+      padding: 6px 10px;
+      text-transform: uppercase;
+    }
+
+    .chart-mode.is-selected {
+      background: #35f2b8;
+      box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.28), 3px 3px 0 rgba(11, 16, 32, 0.24);
+    }
+
+    .chart-caption {
+      min-height: 36px;
+      margin-top: 8px;
+      border: 3px solid var(--line);
+      background: #fffdf1;
+      color: #0b1020;
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.25;
+      padding: 8px;
+      overflow-wrap: anywhere;
+      text-transform: uppercase;
     }
 
     canvas {
@@ -1542,7 +1582,7 @@
 
     .dash-topline {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
       gap: 10px;
       margin-bottom: 8px;
@@ -1557,6 +1597,10 @@
 
     .dash-pill {
       color: #77ff8f;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .dash-pill::before {
@@ -2012,6 +2056,216 @@
       color: #ffffff;
     }
 
+
+    .agent-controls {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .agent-control-panel {
+      border: 3px solid var(--line);
+      background: #fff9e8;
+      box-shadow: 4px 4px 0 var(--shadow);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .agent-control-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-weight: 900;
+      font-size: 13px;
+      color: #0b1020;
+      text-transform: uppercase;
+    }
+
+    .agent-control-row {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .agent-control-panel label {
+      display: grid;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: #344054;
+    }
+
+    .agent-control-panel input,
+    .agent-control-panel select {
+      width: 100%;
+      min-height: 34px;
+      border: 2px solid var(--line);
+      background: #ffffff;
+      color: var(--ink);
+      font: 700 12px/1 "Courier New", ui-monospace, monospace;
+      padding: 6px;
+    }
+
+    .pixel-button {
+      min-height: 36px;
+      border: 3px solid var(--line);
+      background: #51cf66;
+      color: #0b1020;
+      box-shadow: 3px 3px 0 var(--shadow);
+      font: 900 12px/1 "Courier New", ui-monospace, monospace;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .pixel-button.secondary {
+      background: #7dd3fc;
+    }
+
+    .pixel-button.is-running {
+      background: #ffe45e;
+      color: #06101c;
+      box-shadow: 3px 3px 0 var(--shadow), 0 0 0 3px #ffffff, 0 0 16px #ffe45e;
+    }
+
+    .pixel-button.is-complete {
+      background: #7dd3fc;
+      color: #06101c;
+      box-shadow: 3px 3px 0 var(--shadow), 0 0 0 3px #51cf66;
+    }
+
+    .pixel-button.is-error {
+      background: #ff6b6b;
+      color: #ffffff;
+      box-shadow: 3px 3px 0 var(--shadow), 0 0 0 3px #ffffff;
+    }
+
+    .pixel-button:disabled {
+      cursor: wait;
+    }
+
+    .pixel-button:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--shadow);
+    }
+
+    .agent-control-status {
+      min-height: 20px;
+      color: #344054;
+      font-size: 12px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .proficiency-panel {
+      border: 3px solid #45d9e8;
+      background: #071726;
+      box-shadow: 4px 4px 0 #07111e;
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .proficiency-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      color: #e8fff8;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .team-score {
+      color: #51cf66;
+      text-shadow: 2px 2px 0 #07111e;
+    }
+
+    .proficiency-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .agent-score-card {
+      border: 2px solid #45d9e8;
+      background: #0a1d31;
+      color: #e8fff8;
+      box-shadow: 3px 3px 0 #07111e;
+      padding: 8px;
+      display: grid;
+      gap: 6px;
+      min-height: 92px;
+      text-align: left;
+      cursor: pointer;
+      font: 800 11px/1.15 "Courier New", ui-monospace, monospace;
+    }
+
+    .agent-score-card.is-selected {
+      border-color: #ffe45e;
+      box-shadow: 3px 3px 0 #07111e, 0 0 0 2px #ffe45e inset;
+    }
+
+    .agent-score-card.is-warning {
+      border-color: #ff6b6b;
+    }
+
+    .agent-score-card .score-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: center;
+      color: #ffffff;
+    }
+
+    .score-bar {
+      height: 9px;
+      border: 2px solid #07111e;
+      background: #12263d;
+      overflow: hidden;
+    }
+
+    .score-bar span {
+      display: block;
+      height: 100%;
+      width: var(--score-width, 0%);
+      background: #51cf66;
+    }
+
+    .agent-score-card.is-warning .score-bar span {
+      background: #ff6b6b;
+    }
+
+    .score-state {
+      color: #9ee8f5;
+      text-transform: uppercase;
+      overflow-wrap: anywhere;
+    }
+
+    .proficiency-detail {
+      min-height: 42px;
+      border: 2px solid #45d9e8;
+      background: #0a1d31;
+      color: #e8fff8;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 900px) {
+      .proficiency-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
     .news-strip {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -2556,7 +2810,7 @@
     }
 
     .plant-a { left: 18px; bottom: 30px; }
-    .plant-b { left: 372px; bottom: 120px; }
+    .plant-b { left: 370px; bottom: 88px; }
     .plant-c { right: 24px; bottom: 28px; }
 
     .flat-desk {
@@ -2596,6 +2850,39 @@
     .desk-risk { right: 208px; bottom: 86px; }
     .desk-qa { right: 32px; bottom: 86px; }
 
+    .flat-desk.is-working {
+      animation: desk-working 620ms steps(2, end) infinite;
+      box-shadow:
+        inset 0 9px 0 #8b7c91,
+        5px 6px 0 rgba(0, 0, 0, 0.28),
+        0 0 0 3px #31f5d5,
+        0 0 18px #31f5d5;
+      z-index: 31;
+    }
+
+    .flat-desk.is-working img {
+      animation: monitor-working 360ms steps(2, end) infinite;
+    }
+
+    .flat-agent.is-working {
+      filter:
+        drop-shadow(4px 5px 0 rgba(0, 0, 0, 0.38))
+        drop-shadow(0 0 10px #31f5d5)
+        drop-shadow(0 -8px 0 rgba(255, 228, 94, 0.42));
+    }
+
+    .flat-agent.is-working::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: -8px;
+      width: 5px;
+      height: 5px;
+      background: #ffe45e;
+      box-shadow: 10px -5px 0 #31f5d5, 18px 3px 0 #ffffff;
+      animation: work-spark 520ms steps(2, end) infinite;
+    }
+
     .flat-agent.sprite-char {
       --base-x: 0px;
       --base-y: 0px;
@@ -2633,26 +2920,32 @@
       z-index: 26;
     }
 
-    .flat-agent.is-walking {
+    .flat-agent.is-roaming {
+      --move-x: var(--roam-x, 42px);
+      --move-y: var(--roam-y, 0px);
       animation:
         sprite-walk 520ms steps(2, end) infinite,
-        walk-bob 520ms steps(2, end) infinite,
-        patrol 2.4s steps(8, end) infinite;
+        roam-path 4.8s steps(10, end) infinite;
+      z-index: 24;
+    }
+
+    .flat-agent.roam-left {
+      --flip: -1;
+    }
+
+    .flat-agent.move-right,
+    .flat-agent.move-left {
+      animation:
+        sprite-work 440ms steps(2, end) infinite,
+        active-hop 700ms steps(2, end) infinite;
     }
 
     .flat-agent.move-right {
-      --move-x: 58px;
-      animation:
-        sprite-walk 440ms steps(2, end) infinite,
-        move-right-pop 1.2s steps(6, end) infinite;
+      --move-x: 34px;
     }
 
     .flat-agent.move-left {
-      --move-x: -42px;
-      --flip: -1;
-      animation:
-        sprite-walk 440ms steps(2, end) infinite,
-        move-left-pop 1.2s steps(6, end) infinite;
+      --move-x: -30px;
     }
 
     .pm-agent.is-active { --move-x: 24px; }
@@ -2719,7 +3012,54 @@
     .execute { right: 452px; top: 128px; background: #171b27; color: #fff; }
     .search { right: 238px; top: 92px; }
     .memory { right: 126px; top: 150px; font-size: 11px; }
-    .queued { left: 50%; top: 242px; transform: translateX(-50%); background: #171b27; color: #fff; }
+    .queued { left: 50%; top: 242px; transform: translateX(-50%); --bubble-x: -50%; background: #171b27; color: #fff; }
+
+    #pmBubble {
+      left: 34px;
+      top: 104px;
+      max-width: 132px;
+    }
+
+    #dataBubble {
+      left: 294px;
+      top: 88px;
+      max-width: 148px;
+    }
+
+    #riskBubble {
+      right: 226px;
+      bottom: 204px;
+      max-width: 120px;
+    }
+
+    #execBubble {
+      right: 366px;
+      top: 104px;
+      max-width: 128px;
+    }
+
+    #agentBubble {
+      left: 50%;
+      top: 206px;
+      min-width: 190px;
+      max-width: 300px;
+      transform: translateX(-50%);
+      --bubble-x: -50%;
+    }
+
+    .speech-card.is-live::before {
+      content: "";
+      position: absolute;
+      right: -8px;
+      top: -13px;
+      width: 6px;
+      height: 6px;
+      background: #ffe45e;
+      border: 2px solid #06101c;
+      box-shadow: -11px 0 0 -2px #ffe45e, -11px 0 0 0 #06101c, -22px 0 0 -2px #ffe45e, -22px 0 0 0 #06101c;
+      pointer-events: none;
+      animation: typing-dots 620ms steps(3, end) infinite;
+    }
 
     .question-mark {
       width: 34px;
@@ -2767,6 +3107,24 @@
     .ar-4 { right: 358px; top: 180px; width: 122px; }
     .ar-5 { right: 144px; top: 204px; width: 92px; transform: rotate(90deg); }
 
+
+    .speech-card.is-live {
+      background: #51cf66 !important;
+      color: #06101c !important;
+      animation: bubble-live 700ms steps(2, end) infinite;
+      z-index: 46;
+    }
+
+    .agent-label.is-talking {
+      background: #ffe45e;
+      color: #06101c;
+      box-shadow: 3px 3px 0 rgba(6, 16, 28, 0.55), 0 0 0 2px #ffffff;
+    }
+
+    @keyframes bubble-live {
+      from { transform: translateY(0) translateX(var(--bubble-x, 0)); }
+      to { transform: translateY(-3px) translateX(var(--bubble-x, 0)); }
+    }
     .poster-footer {
       text-align: center;
       padding: 12px 10px 14px;
@@ -2794,6 +3152,26 @@
     /* Sheet: 7 cols x 3 rows of 16x32 frames.
        Row 0 (y 0) = front, Row 1 (y -32) = back, Row 2 (y -64) = side.
        Each state cycles two frame-aligned columns so poses never blend. */
+
+    @keyframes desk-working {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-3px); }
+    }
+
+    @keyframes monitor-working {
+      0% { filter: brightness(1) drop-shadow(3px 4px 0 rgba(0, 0, 0, 0.34)); }
+      100% { filter: brightness(1.65) drop-shadow(3px 4px 0 rgba(0, 0, 0, 0.34)); }
+    }
+
+    @keyframes work-spark {
+      0% { opacity: 0; transform: translateY(0); }
+      100% { opacity: 1; transform: translateY(-4px); }
+    }
+
+    @keyframes typing-dots {
+      0% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
     @keyframes sprite-idle {
       from { background-position: 0 0; }        /* front col 0 -> col 1 */
       to { background-position: -32px 0; }
@@ -2819,27 +3197,12 @@
       100% { margin-top: -6px; }
     }
 
-    @keyframes walk-bob {
-      0% { margin-left: 0; }
-      100% { margin-left: 4px; }
-    }
-
-    @keyframes patrol {
-      0% { margin-left: 0; }
-      50% { margin-left: 10px; }
-      100% { margin-left: 0; }
-    }
-
-    @keyframes move-right-pop {
-      0% { margin-left: 0; margin-top: 0; }
-      50% { margin-left: 12px; margin-top: -5px; }
-      100% { margin-left: 0; margin-top: 0; }
-    }
-
-    @keyframes move-left-pop {
-      0% { margin-left: 0; margin-top: 0; }
-      50% { margin-left: -10px; margin-top: -5px; }
-      100% { margin-left: 0; margin-top: 0; }
+    @keyframes roam-path {
+      0% { --move-y: 0px; }
+      25% { --move-y: -10px; }
+      50% { --move-y: 0px; }
+      75% { --move-y: 8px; }
+      100% { --move-y: 0px; }
     }
 
     @keyframes flow-pulse {
@@ -2853,7 +3216,7 @@
     <section class="game-card ops-dashboard">
       <div class="dash-topline">
         <span>OPENCLAN DASHBOARD</span>
-        <span class="dash-pill">BTCUSDT ACTIVE</span>
+        <span class="dash-pill" id="symbolsPill">WATCHLIST ACTIVE</span>
         <span>20:34:13</span>
       </div>
       <section class="poster-office">
@@ -2895,11 +3258,11 @@
           <div class="agent-label label-qa">QA_AGENT</div>
           <div class="agent-label label-intern">INTERN_AGENT</div>
 
-          <div class="speech-card assign">ASSIGN TASK</div>
-          <div class="speech-card execute">EXECUTE CODE</div>
-          <div class="speech-card search">SEARCH WEB</div>
-          <div class="speech-card memory">MEMORY<br>(SESSION 2)</div>
-          <div class="speech-card queued" id="agentBubble">Window queued</div>
+          <div class="speech-card assign" id="pmBubble">PM: idle</div>
+          <div class="speech-card execute" id="execBubble">EXEC: standby</div>
+          <div class="speech-card search" id="dataBubble">DATA: standby</div>
+          <div class="speech-card memory" id="riskBubble">RISK<br>standby</div>
+          <div class="speech-card queued" id="agentBubble">PRESS START AGENTS</div>
           <div class="question-mark q-left">?</div>
           <div class="question-mark q-right">?</div>
           <div class="signal-arrow ar-1" data-flow="assign"></div>
@@ -2914,55 +3277,74 @@
 
       <div class="status-board">
         <div class="title-row">
-          <h1>AGENT GRID WALK-FORWARD</h1>
+          <h1>OKX DEMO AGENT OFFICE</h1>
           <div class="run-state"><span class="led"></span><span id="runState">SYNC</span></div>
         </div>
         <div class="metrics">
-          <div class="metric"><div class="label">Trades</div><div class="value" id="windowsMetric">0 / 0</div></div>
-          <div class="metric"><div class="label">Net PnL</div><div class="value" id="pnlMetric">+0.00</div></div>
-          <div class="metric"><div class="label">Fills</div><div class="value" id="fillsMetric">0</div></div>
-          <div class="metric"><div class="label">Positive</div><div class="value" id="positiveMetric">0</div></div>
-          <div class="metric"><div class="label">Equity</div><div class="value" id="equityMetric">1000.00</div></div>
+          <div class="metric"><div class="label">Positions</div><div class="value" id="windowsMetric">0</div></div>
+          <div class="metric"><div class="label">Demo Equity</div><div class="value" id="pnlMetric">0.00</div></div>
+          <div class="metric"><div class="label">Stop Orders</div><div class="value" id="fillsMetric">0</div></div>
+          <div class="metric"><div class="label">Notional</div><div class="value" id="positiveMetric">0.00</div></div>
+          <div class="metric"><div class="label">PM State</div><div class="value" id="equityMetric">IDLE</div></div>
+        </div>
+      </div>
+      <div class="agent-controls">
+        <div class="agent-control-panel">
+          <div class="agent-control-title"><span>AGENT WORKFLOW</span><span id="agentWorkMode">IDLE</span></div>
+          <button class="pixel-button" id="startAgents" type="button">START AGENTS</button>
+          <div class="agent-control-status" id="agentWorkStatus">Agents ready: DATA -> SIGNAL -> RISK -> PM -> EXEC -> QA.</div>
+        </div>
+        <div class="proficiency-panel">
+          <div class="proficiency-title"><span>TEAM PROFICIENCY</span><span class="team-score" id="teamScore">--</span></div>
+          <div class="proficiency-grid" id="proficiencyGrid"></div>
+          <div class="proficiency-detail" id="proficiencyDetail">Click START AGENTS to score the trading team from OKX demo data.</div>
         </div>
       </div>
       <div class="news-strip">
         <b>AGENT STATUS</b>
-        <span>Dashboard with agent workflow active. Human-style pixel staff, desks, server room, meeting pod.</span>
+        <span id="processDetail">DATA scans OKX demo account, RISK checks positions/stops, PM decides monitor or wait. Only demo account data is used.</span>
       </div>
     </section>
 
     <section class="main-grid">
       <div class="panel">
         <div class="panel-title">
-          <span>Progress</span>
+          <span>Demo Account Scan</span>
           <span id="updatedAt">--</span>
         </div>
         <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-        <div style="height: 12px"></div>
+        <div class="chart-toolbar" aria-label="Trading detail graph controls">
+          <button class="chart-mode is-selected" type="button" data-chart-mode="equity_usdt">Equity</button>
+          <button class="chart-mode" type="button" data-chart-mode="total_notional_usdt">Notional</button>
+          <button class="chart-mode" type="button" data-chart-mode="position_count">Positions</button>
+          <button class="chart-mode" type="button" data-chart-mode="stop_order_count">Stops</button>
+          <button class="chart-mode" type="button" data-chart-mode="team_score">Team</button>
+        </div>
         <canvas id="pnlCanvas" width="900" height="270"></canvas>
+        <div class="chart-caption" id="chartCaption">Press START AGENTS to record trading detail history.</div>
       </div>
 
       <div class="panel">
         <div class="panel-title">
-          <span>Cost Stack</span>
-          <span>RAW</span>
+          <span>Demo Detail</span>
+          <span>OKX</span>
         </div>
         <div class="metrics" style="grid-template-columns: repeat(2, minmax(120px, 1fr));">
           <div class="metric">
-            <div class="label">Fees</div>
-            <div class="value" id="feesMetric">0.00</div>
+            <div class="label">Source</div>
+            <div class="value" id="feesMetric">okx_demo</div>
           </div>
           <div class="metric">
-            <div class="label">Funding</div>
-            <div class="value" id="fundingMetric">0.00</div>
+            <div class="label">Status</div>
+            <div class="value" id="fundingMetric">unknown</div>
           </div>
           <div class="metric">
-            <div class="label">Flatten</div>
-            <div class="value" id="flattenMetric">0.00</div>
+            <div class="label">Reason</div>
+            <div class="value" id="flattenMetric">--</div>
           </div>
           <div class="metric">
-            <div class="label">Pauses</div>
-            <div class="value" id="pausesMetric">0</div>
+            <div class="label">Updated</div>
+            <div class="value" id="pausesMetric">--</div>
           </div>
         </div>
       </div>
@@ -2970,50 +3352,306 @@
 
     <section class="panel" style="margin-top: 14px;">
       <div class="panel-title">
-        <span>Backtest Trades</span>
-        <span id="csvPath">results/grid-raw-walk-forward.csv</span>
+        <span>Current Demo Positions</span>
+        <span id="csvPath">OKX demo account</span>
       </div>
-      <div id="tableWrap" class="empty">Run a backtest, then dashboard-export</div>
+      <div id="tableWrap" class="empty">No current demo positions</div>
     </section>
   </main>
 
   <script>
-    const csvUrl = "../results/grid-raw-walk-forward.csv";
-    // Backtests from this project are already complete, so the row count IS the
-    // total. Kept mutable and updated from the data on each refresh.
-    let totalWindows = 18;
+    let workflowTick = 0;
+    let agentWorkflowStarted = false;
+    let selectedProficiencyAgent = "";
+    let scanHistory = [];
+    let chartMode = "equity_usdt";
+    const chartSeries = {
+      equity_usdt: { label: "Demo Equity", color: "#35f2b8", digits: 2, suffix: " USDT", zeroBase: false },
+      total_notional_usdt: { label: "Open Notional", color: "#ffe45e", digits: 2, suffix: " USDT", zeroBase: true },
+      position_count: { label: "Positions", color: "#51cf66", digits: 0, suffix: "", zeroBase: true },
+      stop_order_count: { label: "Stop Orders", color: "#7dd3fc", digits: 0, suffix: "", zeroBase: true },
+      team_score: { label: "Team Score", color: "#ff8fab", digits: 1, suffix: " / 100", zeroBase: true },
+    };
+    const IDLE_ROAM_AFTER_MS = 10000;
+    const agentLastWorkedAt = {};
+    const roamRoutes = {
+      pm: { x: 32, y: 2, flip: false },
+      dev: { x: 58, y: 6, flip: false },
+      design: { x: 46, y: -4, flip: false },
+      signal: { x: -48, y: 8, flip: true },
+      exec: { x: -54, y: 4, flip: true },
+      qa: { x: -44, y: -5, flip: true },
+      intern: { x: 64, y: 8, flip: false },
+      risk: { x: -50, y: 7, flip: true },
+    };
+    let latestState = {
+      source: "okx_demo",
+      status: "unknown",
+      reason: "not_loaded",
+      equity_usdt: 0,
+      position_count: 0,
+      stop_order_count: 0,
+      total_notional_usdt: 0,
+      positions: [],
+      stop_orders: [],
+      pm_decision: "PM_WAIT_FOR_DEMO_POSITION",
+      updated_at: "--",
+    };
 
-    function parseCsv(text) {
-      const lines = text.trim().split(/\r?\n/).filter(Boolean);
-      if (lines.length <= 1) return [];
-      const headers = lines[0].split(",");
-      return lines.slice(1).map((line) => {
-        const values = line.split(",");
-        return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
-      });
+    function num(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
     }
 
-    function num(row, key) {
-      const value = Number(row[key]);
-      return Number.isFinite(value) ? value : 0;
+    function fixed(value, digits = 2) {
+      const safeDigits = Number.isInteger(digits) ? digits : 2;
+      const parsed = Number(value);
+      const safeValue = Number.isFinite(parsed) ? parsed : 0;
+      return safeValue.toFixed(Math.max(0, Math.min(8, safeDigits)));
     }
 
     function money(value) {
-      const sign = value >= 0 ? "+" : "";
-      return `${sign}${value.toFixed(2)}`;
+      return `${fixed(value)} USDT`;
     }
 
-    function setSigned(el, value) {
-      el.textContent = money(value);
-      el.classList.toggle("positive", value >= 0);
-      el.classList.toggle("negative", value < 0);
+    function decisionLabel(value) {
+      return String(value || "PM_WAIT_FOR_DEMO_POSITION").replaceAll("_", " ");
     }
 
-    function drawChart(rows) {
+    function demoDecision(state) {
+      const positions = num(state.position_count);
+      const stops = num(state.stop_order_count);
+      return {
+        action: decisionLabel(state.pm_decision),
+        detail: `Demo equity ${money(state.equity_usdt)}, positions ${positions}, stops ${stops}, notional ${money(state.total_notional_usdt)}.`,
+        positions,
+        stops,
+        equity: num(state.equity_usdt),
+        notional: num(state.total_notional_usdt),
+        reason: state.reason || "unknown",
+      };
+    }
+
+    function setBubble(id, text, active) {
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.innerHTML = text;
+      node.classList.toggle("is-live", active);
+    }
+
+    function setTalkingLabels(agentKeys) {
+      const map = {
+        pm: ".label-pm",
+        dev: ".label-dev",
+        design: ".label-design",
+        signal: ".label-signal",
+        risk: ".label-risk",
+        exec: ".label-exec",
+        qa: ".label-qa",
+        intern: ".label-intern",
+      };
+      Object.entries(map).forEach(([key, selector]) => {
+        const node = document.querySelector(selector);
+        if (node) node.classList.toggle("is-talking", agentKeys.includes(key));
+      });
+    }
+
+
+    function setWorkingDesks(agentKeys) {
+      const map = {
+        pm: ".desk-pm",
+        dev: ".desk-dev-l",
+        design: ".desk-design",
+        signal: ".desk-dev-l",
+        risk: ".desk-risk",
+        exec: ".desk-dev-r",
+        qa: ".desk-qa",
+        intern: ".desk-dev-l",
+      };
+      const activeDesks = new Set(agentKeys.map((key) => map[key]).filter(Boolean));
+      document.querySelectorAll(".flat-desk").forEach((desk) => {
+        const selector = [...activeDesks].find((item) => desk.matches(item));
+        desk.classList.toggle("is-working", Boolean(selector));
+      });
+    }
+
+    function clearAgentActivity() {
+      document.querySelectorAll(".flat-agent").forEach((agent) => {
+        agent.classList.remove("is-active", "move-right", "move-left", "is-roaming", "roam-left", "is-working");
+        agent.style.removeProperty("--roam-x");
+        agent.style.removeProperty("--roam-y");
+      });
+      document.querySelectorAll(".signal-arrow").forEach((arrow) => arrow.classList.remove("is-active"));
+      setTalkingLabels([]);
+      setWorkingDesks([]);
+    }
+
+    function showIdleOffice() {
+      clearAgentActivity();
+      setBubble("agentBubble", "PRESS START AGENTS", false);
+      setBubble("pmBubble", "PM: idle", false);
+      setBubble("dataBubble", "DATA: standby", false);
+      setBubble("riskBubble", "RISK<br>standby", false);
+      setBubble("execBubble", "EXEC: standby", false);
+      const detail = document.getElementById("processDetail");
+      if (detail) detail.textContent = "Agents are idle. Press START AGENTS to scan OKX demo account.";
+    }
+    function updateAgentMotion(state = latestState) {
+      if (!agentWorkflowStarted) {
+        showIdleOffice();
+        return;
+      }
+      const decision = demoDecision(state);
+      const stages = [
+        {
+          agents: ["dev", "intern"],
+          movers: ["dev", "intern"],
+          flow: "assign",
+          main: "DATA_AGENT: scanning OKX demo account",
+          detail: "DATA reads demo balance, current positions, and open stop orders from OKX only.",
+          pm: "PM: waiting<br>demo scan",
+          data: "DATA: OKX<br>demo scan",
+          risk: "RISK<br>standby",
+          exec: "EXEC: no<br>order UI",
+        },
+        {
+          agents: ["signal", "dev"],
+          movers: ["signal"],
+          flow: "signal",
+          main: `SIGNAL: ${decision.positions} demo position(s)`,
+          detail: `SIGNAL summarizes current exposure: ${money(decision.notional)} notional from OKX demo positions.`,
+          pm: "PM: needs<br>position brief",
+          data: `POS: ${decision.positions}<br>STOP: ${decision.stops}`,
+          risk: "RISK<br>standby",
+          exec: "EXEC: wait",
+        },
+        {
+          agents: ["risk", "signal"],
+          movers: ["risk"],
+          left: ["signal"],
+          flow: "review",
+          main: "RISK_AGENT: checking position/stop consistency",
+          detail: `RISK result: ${state.status}/${decision.reason}. Stops visible: ${decision.stops}.`,
+          pm: "PM: risk<br>report next",
+          data: "DATA: demo<br>only",
+          risk: `${String(state.status).toUpperCase()}<br>${decision.reason}`,
+          exec: "EXEC: blocked",
+        },
+        {
+          agents: ["pm", "risk"],
+          movers: ["pm"],
+          flow: "review",
+          main: `PM_AGENT DECISION: ${decision.action}`,
+          detail: `PM receives demo-only report: ${decision.detail}`,
+          pm: `${decision.action}<br>POS ${decision.positions}`,
+          data: `EQUITY<br>${fixed(decision.equity)}`,
+          risk: `STOP<br>${decision.stops}`,
+          exec: "EXEC: wait<br>PM",
+        },
+        {
+          agents: ["exec", "pm"],
+          movers: ["exec"],
+          flow: "exec",
+          main: decision.positions > 0 ? "EXEC_AGENT: monitoring existing demo position" : "EXEC_AGENT: no current demo position to manage",
+          detail: "EXEC has no manual open-order control. It only reports current demo account state.",
+          pm: "PM: monitor<br>demo only",
+          data: "DATA: refresh",
+          risk: "RISK<br>guard on",
+          exec: decision.positions > 0 ? "EXEC: monitor" : "EXEC: idle",
+        },
+        {
+          agents: ["qa", "intern"],
+          movers: ["intern"],
+          left: ["qa"],
+          flow: "risk",
+          main: "QA_AGENT: logging demo account scan",
+          detail: "QA updates the dashboard from OKX demo state and starts the next scan loop.",
+          pm: "PM: next<br>scan",
+          data: "DATA: loop",
+          risk: "RISK<br>logged",
+          exec: "QA: audit",
+        },
+      ];
+      const stage = stages[workflowTick % stages.length];
+      workflowTick += 1;
+
+      const now = Date.now();
+      document.querySelectorAll(".flat-agent").forEach((agent) => {
+        const key = agent.dataset.agent;
+        const active = stage.agents.includes(key);
+        const moveRight = (stage.movers ?? []).includes(key);
+        const moveLeft = (stage.left ?? []).includes(key);
+        const working = active || moveRight || moveLeft;
+        if (!agentLastWorkedAt[key]) agentLastWorkedAt[key] = now;
+        if (working) agentLastWorkedAt[key] = now;
+        const idleMs = now - agentLastWorkedAt[key];
+        const roaming = !working && idleMs > IDLE_ROAM_AFTER_MS;
+        const route = roamRoutes[key] || { x: 34, y: 0, flip: false };
+        const roamStep = roaming ? Math.floor((idleMs - IDLE_ROAM_AFTER_MS) / 6000) : 0;
+        const roamX = roamStep % 2 === 0 ? route.x : Math.round(route.x * -0.65);
+        const roamY = roamStep % 2 === 0 ? route.y : Math.round(route.y * -0.5);
+        agent.style.setProperty("--roam-x", `${roamX}px`);
+        agent.style.setProperty("--roam-y", `${roamY}px`);
+        agent.classList.toggle("is-active", active);
+        agent.classList.toggle("move-right", moveRight);
+        agent.classList.toggle("move-left", moveLeft);
+        agent.classList.toggle("is-roaming", roaming);
+        agent.classList.toggle("roam-left", roaming && roamX < 0);
+        agent.classList.toggle("is-working", working);
+      });
+      document.querySelectorAll(".signal-arrow").forEach((arrow) => {
+        arrow.classList.toggle("is-active", arrow.dataset.flow === stage.flow);
+      });
+      setTalkingLabels(stage.agents);
+      setWorkingDesks(stage.agents);
+      setBubble("agentBubble", stage.main, true);
+      setBubble("pmBubble", stage.pm, stage.agents.includes("pm"));
+      setBubble("dataBubble", stage.data, stage.agents.includes("dev") || stage.agents.includes("signal"));
+      setBubble("riskBubble", stage.risk, stage.agents.includes("risk"));
+      setBubble("execBubble", stage.exec, stage.agents.includes("exec") || stage.agents.includes("qa"));
+      const detail = document.getElementById("processDetail");
+      if (detail) detail.textContent = stage.detail;
+    }
+
+    function liveChartPoint(state) {
+      return {
+        time: state.updated_at || new Date().toISOString(),
+        equity_usdt: num(state.equity_usdt),
+        total_notional_usdt: num(state.total_notional_usdt),
+        position_count: num(state.position_count),
+        stop_order_count: num(state.stop_order_count),
+        team_score: num(state.team_score),
+        status: state.status || "unknown",
+        reason: state.reason || "--",
+        pm_decision: state.pm_decision || "--",
+        execution: state.execution || "--",
+        symbols_label: state.symbols_label || "--",
+      };
+    }
+
+    function chartPointsFor(state) {
+      const points = scanHistory.slice(-80);
+      const live = liveChartPoint(state || latestState);
+      const last = points[points.length - 1];
+      if (!last || last.time !== live.time || last.equity_usdt !== live.equity_usdt || last.position_count !== live.position_count) {
+        points.push(live);
+      }
+      return points.slice(-80);
+    }
+
+    function formatChartValue(value, meta) {
+      return `${fixed(value, meta.digits)}${meta.suffix}`;
+    }
+
+    function drawChart(state) {
       const canvas = document.getElementById("pnlCanvas");
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
+      const caption = document.getElementById("chartCaption");
       const w = canvas.width;
       const h = canvas.height;
+      const meta = chartSeries[chartMode] || chartSeries.equity_usdt;
+      const points = chartPointsFor(state || latestState);
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = "#101828";
       ctx.fillRect(0, 0, w, h);
@@ -3031,74 +3669,136 @@
         ctx.lineTo(w, y);
         ctx.stroke();
       }
-      if (!rows.length) return;
-      const cumulative = [];
-      rows.reduce((acc, row) => {
-        const next = acc + num(row, "pnl");
-        cumulative.push(next);
-        return next;
-      }, 0);
-      const min = Math.min(0, ...cumulative);
-      const max = Math.max(0, ...cumulative);
-      const span = Math.max(1, max - min);
-      const xStep = w / Math.max(1, totalWindows - 1);
-      const yFor = (value) => h - ((value - min) / span) * (h - 30) - 15;
-      const zeroY = yFor(0);
-      ctx.strokeStyle = "#d0d5dd";
-      ctx.beginPath();
-      ctx.moveTo(0, zeroY);
-      ctx.lineTo(w, zeroY);
-      ctx.stroke();
-      ctx.strokeStyle = "#51cf66";
+      if (!points.length) {
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "20px Courier New";
+        ctx.fillText("NO SCAN HISTORY YET", 220, 136);
+        if (caption) caption.textContent = "Press START AGENTS to record trading detail history.";
+        return;
+      }
+      const values = points.map((point) => num(point[chartMode]));
+      const rawMin = Math.min(...values);
+      const rawMax = Math.max(...values);
+      let yMin = meta.zeroBase ? 0 : rawMin;
+      let yMax = rawMax;
+      if (yMax === yMin) {
+        const pad = Math.max(1, Math.abs(yMax) * 0.01);
+        yMax += pad;
+        yMin = meta.zeroBase ? 0 : Math.max(0, yMin - pad);
+      } else {
+        const pad = (yMax - yMin) * 0.12;
+        yMax += pad;
+        yMin = meta.zeroBase ? 0 : Math.max(0, yMin - pad);
+      }
+      const plot = { left: 82, top: 24, right: w - 26, bottom: h - 44 };
+      const span = Math.max(1, yMax - yMin);
+      const xAt = (index) => points.length === 1 ? (plot.left + plot.right) / 2 : plot.left + (index / (points.length - 1)) * (plot.right - plot.left);
+      const yAt = (value) => plot.bottom - ((value - yMin) / span) * (plot.bottom - plot.top);
+      ctx.fillStyle = "rgba(53, 242, 184, 0.08)";
+      ctx.fillRect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
+      ctx.strokeStyle = "#8aa4c8";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "16px Courier New";
+      ctx.fillText(meta.label.toUpperCase(), plot.left, 18);
+      ctx.fillText(formatChartValue(yMax, meta), 8, plot.top + 6);
+      ctx.fillText(formatChartValue(yMin, meta), 8, plot.bottom);
+      ctx.strokeStyle = meta.color;
       ctx.lineWidth = 4;
       ctx.beginPath();
-      cumulative.forEach((value, index) => {
-        const x = index * xStep;
-        const y = yFor(value);
+      points.forEach((point, index) => {
+        const x = xAt(index);
+        const y = yAt(num(point[chartMode]));
         if (index === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
       ctx.stroke();
-      cumulative.forEach((value, index) => {
-        const x = index * xStep;
-        const y = yFor(value);
-        ctx.fillStyle = value >= 0 ? "#51cf66" : "#ff6b6b";
-        ctx.fillRect(x - 4, y - 4, 8, 8);
+      points.forEach((point, index) => {
+        const x = xAt(index);
+        const y = yAt(num(point[chartMode]));
+        ctx.fillStyle = point.status === "ok" ? meta.color : "#ff6b6b";
+        ctx.fillRect(x - 5, y - 5, 10, 10);
       });
+      const first = points[0];
+      const last = points[points.length - 1];
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "14px Courier New";
+      ctx.fillText(new Date(first.time).toLocaleTimeString(), plot.left, h - 16);
+      const lastLabel = new Date(last.time).toLocaleTimeString();
+      ctx.fillText(lastLabel, Math.max(plot.left, plot.right - 118), h - 16);
+      ctx.font = "18px Courier New";
+      ctx.fillText(formatChartValue(num(last[chartMode]), meta), plot.right - 190, plot.top + 28);
+      if (caption) {
+        caption.textContent = `${meta.label}: ${formatChartValue(num(last[chartMode]), meta)} | ${last.status}/${last.reason} | ${decisionLabel(last.pm_decision)} | ${last.execution}`;
+      }
     }
-
-    function renderTable(rows) {
+    function renderProficiency(state) {
+      const grid = document.getElementById("proficiencyGrid");
+      const detail = document.getElementById("proficiencyDetail");
+      const teamScore = document.getElementById("teamScore");
+      const agents = state.agent_proficiency || [];
+      if (teamScore) teamScore.textContent = state.team_score == null ? "--" : `${fixed(state.team_score, 1)} / 100`;
+      if (!grid || !detail) return;
+      if (!agents.length) {
+        grid.innerHTML = "";
+        detail.textContent = "Click START AGENTS to score the trading team from OKX demo data.";
+        return;
+      }
+      if (!selectedProficiencyAgent || !agents.some((agent) => agent.name === selectedProficiencyAgent)) {
+        selectedProficiencyAgent = agents[0].name;
+      }
+      grid.innerHTML = agents.map((agent) => {
+        const score = num(agent.score);
+        const warning = score < 70 ? " is-warning" : "";
+        const selected = agent.name === selectedProficiencyAgent ? " is-selected" : "";
+        return `
+          <button class="agent-score-card${warning}${selected}" type="button" data-agent-name="${agent.name}">
+            <span class="score-row"><span>${agent.name}</span><span>${fixed(score, 0)}</span></span>
+            <span class="score-bar" style="--score-width: ${Math.max(0, Math.min(100, score))}%"><span></span></span>
+            <span class="score-state">${agent.state || "unknown"}</span>
+          </button>
+        `;
+      }).join("");
+      grid.querySelectorAll(".agent-score-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          selectedProficiencyAgent = card.dataset.agentName || "";
+          renderProficiency(latestState);
+        });
+      });
+      const selected = agents.find((agent) => agent.name === selectedProficiencyAgent) || agents[0];
+      const recommendations = (state.team_recommendations || []).join(" ");
+      detail.textContent = `${selected.name} (${selected.role}): ${selected.detail} ${recommendations}`;
+    }
+    function renderPositions(state) {
       const wrap = document.getElementById("tableWrap");
+      const rows = state.positions || [];
       if (!rows.length) {
         wrap.className = "empty";
-        wrap.textContent = "Waiting for raw walk-forward rows";
+        wrap.textContent = "No current OKX demo positions";
         return;
       }
       wrap.className = "";
       const cells = rows.map((row) => `
         <tr>
-          <td>${row.window}</td>
-          <td>${row.validation_start}</td>
-          <td>${row.validation_end}</td>
-          <td class="${num(row, "pnl") >= 0 ? "positive" : "negative"}">${money(num(row, "pnl"))}</td>
-          <td>${num(row, "fills").toFixed(0)}</td>
-          <td>${num(row, "fees").toFixed(3)}</td>
-          <td>${num(row, "funding_paid").toFixed(3)}</td>
-          <td>${num(row, "paused_refreshes").toFixed(0)}</td>
+          <td>${row.symbol}</td>
+          <td>${row.side}</td>
+          <td>${fixed(row.quantity, 6)}</td>
+          <td>${fixed(row.entry_price, 4)}</td>
+          <td>${money(row.notional_usdt)}</td>
+          <td>${fixed(row.leverage, 2)}x</td>
         </tr>
       `).join("");
       wrap.innerHTML = `
         <table>
           <thead>
             <tr>
-              <th>Win</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>PnL</th>
-              <th>Fills</th>
-              <th>Fees</th>
-              <th>Funding</th>
-              <th>Pause</th>
+              <th>Symbol</th>
+              <th>Side</th>
+              <th>Qty</th>
+              <th>Entry</th>
+              <th>Notional</th>
+              <th>Lev</th>
             </tr>
           </thead>
           <tbody>${cells}</tbody>
@@ -3106,70 +3806,157 @@
       `;
     }
 
-    function updateAgentMotion(rows, complete) {
-      const stages = [
-        { agents: ["pm", "dev"], movers: ["pm", "dev"], flow: "assign", text: "Assign task" },
-        { agents: ["dev", "signal"], movers: ["dev", "signal"], flow: "signal", text: "Analyze grid" },
-        { agents: ["signal", "risk"], movers: ["signal"], left: ["risk"], flow: "review", text: "Check risk" },
-        { agents: ["exec"], movers: ["exec"], flow: "exec", text: "Quote orders" },
-        { agents: ["qa", "intern"], movers: ["intern"], left: ["qa"], flow: "risk", text: "Validate window" },
-      ];
-      const stage = complete ? stages[4] : stages[rows.length % stages.length];
-      document.querySelectorAll(".flat-agent").forEach((agent) => {
-        const active = stage.agents.includes(agent.dataset.agent);
-        const moveRight = (stage.movers ?? []).includes(agent.dataset.agent);
-        const moveLeft = (stage.left ?? []).includes(agent.dataset.agent);
-        agent.classList.toggle("is-active", active);
-        agent.classList.toggle("move-right", moveRight);
-        agent.classList.toggle("move-left", moveLeft);
-        agent.classList.toggle("is-walking", !active && ["intern", "dev", "signal"].includes(agent.dataset.agent));
-      });
-      document.querySelectorAll(".signal-arrow").forEach((arrow) => {
-        arrow.classList.toggle("is-active", arrow.dataset.flow === stage.flow);
-      });
-      const bubble = document.getElementById("agentBubble");
-      if (bubble) {
-        bubble.textContent = complete ? "All windows complete" : `${stage.text}: window ${rows.length + 1}`;
+    function applyState(state) {
+      latestState = state;
+      const symbolsPill = document.getElementById("symbolsPill");
+      if (symbolsPill) {
+        const labels = String(state.symbols_label || "WATCHLIST").split(" / ").filter(Boolean);
+        const compact = labels.length > 4 ? `${labels.slice(0, 3).join(" / ")} +${labels.length - 3}` : labels.join(" / ");
+        symbolsPill.textContent = `${compact || "WATCHLIST"} ACTIVE`;
+        symbolsPill.title = (state.watchlist || []).join(", ");
       }
+      document.getElementById("windowsMetric").textContent = String(state.position_count ?? 0);
+      document.getElementById("pnlMetric").textContent = fixed(state.equity_usdt);
+      document.getElementById("fillsMetric").textContent = String(state.stop_order_count ?? 0);
+      document.getElementById("positiveMetric").textContent = fixed(state.total_notional_usdt);
+      document.getElementById("equityMetric").textContent = decisionLabel(state.pm_decision).replace("PM ", "");
+      document.getElementById("feesMetric").textContent = state.source || "okx_demo";
+      document.getElementById("fundingMetric").textContent = state.status || "unknown";
+      document.getElementById("flattenMetric").textContent = state.reason || "--";
+      document.getElementById("pausesMetric").textContent = new Date(state.updated_at || Date.now()).toLocaleTimeString();
+      document.getElementById("progressFill").style.width = state.status === "ok" ? "100%" : "45%";
+      const backendRunning = Boolean(state.background_running);
+      document.getElementById("runState").textContent = backendRunning ? "AUTO" : (state.position_count > 0 ? "MONITOR" : "SCAN");
+      const startButton = document.getElementById("startAgents");
+      const workMode = document.getElementById("agentWorkMode");
+      const workStatus = document.getElementById("agentWorkStatus");
+      if (backendRunning && startButton && !startButton.disabled) {
+        startButton.classList.remove("is-running", "is-error");
+        startButton.classList.add("is-complete");
+        startButton.textContent = "AGENTS RUNNING";
+        if (workMode) workMode.textContent = "BACKGROUND";
+        if (workStatus) workStatus.textContent = `Backend loop active. Cycle ${state.background_cycle_count || 0}; phase ${state.background_phase || "running"}.`;
+      }
+      document.getElementById("updatedAt").textContent = new Date(state.updated_at || Date.now()).toLocaleTimeString();
+      renderProficiency(state);
+      renderPositions(state);
+      drawChart(state);
     }
 
+    async function refreshHistory() {
+      try {
+        const response = await fetch(`/api/agents/history?t=${Date.now()}`);
+        if (!response.ok) throw new Error(String(response.status));
+        const payload = await response.json();
+        scanHistory = Array.isArray(payload.points) ? payload.points : [];
+        drawChart(latestState);
+      } catch (error) {
+        const caption = document.getElementById("chartCaption");
+        if (caption && !scanHistory.length) caption.textContent = "Trading detail history is not available yet.";
+      }
+    }
     async function refresh() {
       try {
-        const response = await fetch(`${csvUrl}?t=${Date.now()}`);
+        const response = await fetch(`/api/agents/status?t=${Date.now()}`);
         if (!response.ok) throw new Error(String(response.status));
-        const rows = parseCsv(await response.text());
-        const pnl = rows.reduce((sum, row) => sum + num(row, "pnl"), 0);
-        const fills = rows.reduce((sum, row) => sum + num(row, "fills"), 0);
-        const fees = rows.reduce((sum, row) => sum + num(row, "fees"), 0);
-        const funding = rows.reduce((sum, row) => sum + num(row, "funding_paid"), 0);
-        const flatten = rows.reduce((sum, row) => sum + num(row, "flatten_fee"), 0);
-        const pauses = rows.reduce((sum, row) => sum + num(row, "paused_refreshes"), 0);
-        const positive = rows.filter((row) => num(row, "pnl") > 0).length;
-        if (rows.length) totalWindows = rows.length;
-        const startEquity = rows.length ? (num(rows[0], "start_equity") || 10000) : 10000;
-        document.getElementById("windowsMetric").textContent = `${rows.length} / ${totalWindows}`;
-        setSigned(document.getElementById("pnlMetric"), pnl);
-        document.getElementById("fillsMetric").textContent = fills.toFixed(0);
-        document.getElementById("positiveMetric").textContent = positive.toFixed(0);
-        document.getElementById("equityMetric").textContent = (startEquity + pnl).toFixed(2);
-        document.getElementById("feesMetric").textContent = fees.toFixed(3);
-        document.getElementById("fundingMetric").textContent = funding.toFixed(3);
-        document.getElementById("flattenMetric").textContent = flatten.toFixed(3);
-        document.getElementById("pausesMetric").textContent = pauses.toFixed(0);
-        document.getElementById("progressFill").style.width = `${Math.min(100, rows.length / totalWindows * 100)}%`;
-        document.getElementById("runState").textContent = rows.length >= totalWindows ? "DONE" : "RUNNING";
-        updateAgentMotion(rows, rows.length >= totalWindows);
-        document.getElementById("updatedAt").textContent = new Date().toLocaleTimeString();
-        renderTable(rows);
-        drawChart(rows);
+        const state = await response.json();
+        applyState(state);
+        if (state.background_running) agentWorkflowStarted = true;
+        if (agentWorkflowStarted) updateAgentMotion(latestState);
+        else showIdleOffice();
       } catch (error) {
         document.getElementById("runState").textContent = "WAIT";
-        updateAgentMotion([], false);
-        document.getElementById("agentBubble").textContent = "CSV not ready";
+        if (agentWorkflowStarted) {
+          document.getElementById("agentBubble").textContent = "DATA_AGENT: waiting for OKX demo";
+        } else {
+          showIdleOffice();
+        }
       }
     }
+    async function notifyAgentsStopped(mode, detail = {}) {
+      try {
+        await postJson("/api/agents/stopped", {
+          mode,
+          reason: detail.reason || latestState.reason || "workflow_finished",
+          pm_decision: detail.pm_decision || latestState.pm_decision,
+          position_count: latestState.position_count || 0,
+          stop_order_count: latestState.stop_order_count || 0,
+          equity_usdt: latestState.equity_usdt || 0,
+        });
+      } catch (error) {
+        console.warn("telegram alert failed", error);
+      }
+    }
+    async function postJson(url, body) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
+      });
+      const payload = await response.json().catch(() => ({ error: "invalid response" }));
+      if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+      return payload;
+    }
 
-    refresh();
+    async function startAgents() {
+      const status = document.getElementById("agentWorkStatus");
+      const mode = document.getElementById("agentWorkMode");
+      const button = document.getElementById("startAgents");
+      button.classList.remove("is-complete", "is-error");
+      button.classList.add("is-running");
+      button.disabled = true;
+      button.textContent = "STARTING...";
+      status.textContent = "Starting backend agent loop. Browser can be minimized after this.";
+      mode.textContent = "STARTING";
+      agentWorkflowStarted = true;
+      workflowTick = 0;
+      updateAgentMotion(latestState);
+      try {
+        const result = await postJson("/api/agents/start", {});
+        applyState(result);
+        await refreshHistory();
+        mode.textContent = "BACKGROUND";
+        status.textContent = `Backend loop running every ${fixed(result.worker?.interval_seconds || 60, 0)}s. Latest: ${decisionLabel(result.pm_decision)}, positions ${result.position_count}, stops ${result.stop_order_count}.`;
+        button.classList.remove("is-running");
+        button.classList.add("is-complete");
+        button.textContent = "AGENTS RUNNING";
+        workflowTick = 3;
+        document.getElementById("agentBubble").textContent = "PM_AGENT: backend loop running";
+        updateAgentMotion(latestState);
+      } catch (error) {
+        button.classList.remove("is-running");
+        button.classList.add("is-error");
+        button.textContent = "SCAN FAILED";
+        mode.textContent = "ERROR";
+        status.textContent = error.message;
+        document.getElementById("agentBubble").textContent = "PM_AGENT: demo scan failed";
+        await notifyAgentsStopped("error", { reason: error.message, pm_decision: "PM_SCAN_FAILED" });
+      } finally {
+        button.disabled = false;
+      }
+    }
+    async function maybeAutostartAgents() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("autostart") !== "1") return;
+      const button = document.getElementById("startAgents");
+      if (!button || button.disabled) return;
+      await startAgents();
+    }
+
+    document.querySelectorAll(".chart-mode").forEach((button) => {
+      button.addEventListener("click", () => {
+        chartMode = button.dataset.chartMode || "equity_usdt";
+        document.querySelectorAll(".chart-mode").forEach((item) => item.classList.toggle("is-selected", item === button));
+        drawChart(latestState);
+      });
+    });
+    document.getElementById("startAgents").addEventListener("click", startAgents);
+    showIdleOffice();
+    refresh().then(refreshHistory).finally(() => maybeAutostartAgents());
+    setInterval(() => {
+      if (agentWorkflowStarted) updateAgentMotion(latestState);
+      else showIdleOffice();
+    }, 3000);
     setInterval(refresh, 30000);
   </script>
 </body>
