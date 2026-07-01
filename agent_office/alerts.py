@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+import ssl
 from dataclasses import dataclass
 from typing import Any
-from urllib import parse, request
+from urllib import error, parse, request
+
+import certifi
 
 
 @dataclass(frozen=True)
@@ -41,8 +44,10 @@ class TelegramNotifier:
         req = request.Request(url, data=payload, method="POST")
         req.add_header("Content-Type", "application/x-www-form-urlencoded")
         try:
-            with request.urlopen(req, timeout=self.timeout_seconds) as response:
+            with request.urlopen(req, timeout=self.timeout_seconds, context=_telegram_ssl_context()) as response:
                 body = response.read().decode("utf-8")
+        except error.HTTPError as exc:
+            return TelegramResult(enabled=True, sent=False, reason=_telegram_error_reason(exc))
         except Exception as exc:
             return TelegramResult(enabled=True, sent=False, reason=str(exc))
 
@@ -127,6 +132,22 @@ def _env_text(name: str) -> str | None:
     if value is None or not value.strip():
         return None
     return value.strip()
+
+
+def _telegram_error_reason(exc: error.HTTPError) -> str:
+    try:
+        body = exc.read().decode("utf-8")
+    except Exception:
+        return str(exc)
+    try:
+        parsed = json.loads(body)
+    except json.JSONDecodeError:
+        return str(exc)
+    return str(parsed.get("description") or str(exc))
+
+
+def _telegram_ssl_context() -> ssl.SSLContext:
+    return ssl.create_default_context(cafile=certifi.where())
 
 
 def _int_text(value: Any) -> str:

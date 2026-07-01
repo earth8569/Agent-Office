@@ -658,7 +658,7 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      grid-template-columns: minmax(0, 1.65fr) minmax(220px, 0.35fr);
       gap: 12px;
       margin-top: 14px;
     }
@@ -740,10 +740,32 @@
 
     canvas {
       width: 100%;
-      height: 270px;
+      height: 400px;
       border: 3px solid var(--line);
       background: #101828;
       image-rendering: pixelated;
+      cursor: zoom-in;
+    }
+
+    .demo-detail-panel .metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 6px;
+    }
+
+    .demo-detail-panel .metric {
+      min-height: 54px;
+      padding: 7px;
+    }
+
+    .demo-detail-panel .metric .label {
+      font-size: 10px;
+    }
+
+    .demo-detail-panel .metric .value {
+      margin-top: 4px;
+      font-size: 14px;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
     }
 
     table {
@@ -3320,11 +3342,11 @@
           <button class="chart-mode" type="button" data-chart-mode="stop_order_count">Stops</button>
           <button class="chart-mode" type="button" data-chart-mode="team_score">Team</button>
         </div>
-        <canvas id="pnlCanvas" width="900" height="270"></canvas>
+        <canvas id="pnlCanvas" width="1100" height="400"></canvas>
         <div class="chart-caption" id="chartCaption">Press START AGENTS to record trading detail history.</div>
       </div>
 
-      <div class="panel">
+      <div class="panel demo-detail-panel">
         <div class="panel-title">
           <span>Demo Detail</span>
           <span>OKX</span>
@@ -3365,6 +3387,13 @@
     let selectedProficiencyAgent = "";
     let scanHistory = [];
     let chartMode = "equity_usdt";
+    let chartZoomX = 1;
+    let chartZoomY = 1;
+    let chartZoomAnchorX = 1;
+    let chartZoomAnchorY = 0.5;
+    let chartPanStartX = 0;
+    let chartPanStartAnchorX = 1;
+    let chartPanning = false;
     const chartSeries = {
       equity_usdt: { label: "Demo Equity", color: "#35f2b8", digits: 2, suffix: " USDT", zeroBase: false },
       total_notional_usdt: { label: "Open Notional", color: "#ffe45e", digits: 2, suffix: " USDT", zeroBase: true },
@@ -3651,7 +3680,11 @@
       const w = canvas.width;
       const h = canvas.height;
       const meta = chartSeries[chartMode] || chartSeries.equity_usdt;
-      const points = chartPointsFor(state || latestState);
+      const allPoints = chartPointsFor(state || latestState);
+      const visiblePointCount = Math.max(1, Math.ceil(allPoints.length / chartZoomX));
+      const lastStart = Math.max(0, allPoints.length - visiblePointCount);
+      const anchoredStart = Math.round((allPoints.length - visiblePointCount) * chartZoomAnchorX);
+      const points = allPoints.slice(Math.min(lastStart, Math.max(0, anchoredStart)), Math.min(lastStart, Math.max(0, anchoredStart)) + visiblePointCount);
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = "#101828";
       ctx.fillRect(0, 0, w, h);
@@ -3679,17 +3712,21 @@
       const values = points.map((point) => num(point[chartMode]));
       const rawMin = Math.min(...values);
       const rawMax = Math.max(...values);
-      let yMin = meta.zeroBase ? 0 : rawMin;
-      let yMax = rawMax;
-      if (yMax === yMin) {
-        const pad = Math.max(1, Math.abs(yMax) * 0.01);
-        yMax += pad;
-        yMin = meta.zeroBase ? 0 : Math.max(0, yMin - pad);
+      let baseYMin = meta.zeroBase ? 0 : rawMin;
+      let baseYMax = rawMax;
+      if (baseYMax === baseYMin) {
+        const pad = Math.max(1, Math.abs(baseYMax) * 0.01);
+        baseYMax += pad;
+        baseYMin = meta.zeroBase ? 0 : Math.max(0, baseYMin - pad);
       } else {
-        const pad = (yMax - yMin) * 0.12;
-        yMax += pad;
-        yMin = meta.zeroBase ? 0 : Math.max(0, yMin - pad);
+        const pad = (baseYMax - baseYMin) * 0.12;
+        baseYMax += pad;
+        baseYMin = meta.zeroBase ? 0 : Math.max(0, baseYMin - pad);
       }
+      const baseSpan = Math.max(1, baseYMax - baseYMin);
+      const zoomedSpan = baseSpan / chartZoomY;
+      const yMin = baseYMin + (1 - chartZoomAnchorY) * (baseSpan - zoomedSpan);
+      const yMax = yMin + zoomedSpan;
       const plot = { left: 82, top: 24, right: w - 26, bottom: h - 44 };
       const span = Math.max(1, yMax - yMin);
       const xAt = (index) => points.length === 1 ? (plot.left + plot.right) / 2 : plot.left + (index / (points.length - 1)) * (plot.right - plot.left);
@@ -3950,6 +3987,51 @@
         drawChart(latestState);
       });
     });
+    const chartCanvas = document.getElementById("pnlCanvas");
+    if (chartCanvas) {
+      chartCanvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        const points = chartPointsFor(latestState);
+        if (points.length < 2) return;
+        const rect = chartCanvas.getBoundingClientRect();
+        const canvasX = (event.clientX - rect.left) * (chartCanvas.width / rect.width);
+        const canvasY = (event.clientY - rect.top) * (chartCanvas.height / rect.height);
+        chartZoomAnchorX = Math.max(0, Math.min(1, (canvasX - 82) / (chartCanvas.width - 108)));
+        chartZoomAnchorY = Math.max(0, Math.min(1, (canvasY - 24) / (chartCanvas.height - 68)));
+        const zoomFactor = event.deltaY < 0 ? 1.2 : 1 / 1.2;
+        chartZoomX = Math.max(1, Math.min(points.length, chartZoomX * zoomFactor));
+        chartZoomY = Math.max(1, Math.min(100, chartZoomY * zoomFactor));
+        chartCanvas.style.cursor = chartZoomX > 1 || chartZoomY > 1 ? "zoom-out" : "zoom-in";
+        drawChart(latestState);
+      }, { passive: false });
+      chartCanvas.addEventListener("pointerdown", (event) => {
+        if (event.button !== 1) return;
+        event.preventDefault();
+        chartPanning = true;
+        chartPanStartX = event.clientX;
+        chartPanStartAnchorX = chartZoomAnchorX;
+        chartCanvas.setPointerCapture(event.pointerId);
+        chartCanvas.style.cursor = "grabbing";
+      });
+      chartCanvas.addEventListener("pointermove", (event) => {
+        if (!chartPanning) return;
+        const points = chartPointsFor(latestState);
+        const visiblePointCount = Math.max(1, Math.ceil(points.length / chartZoomX));
+        const panRange = points.length - visiblePointCount;
+        if (!panRange) return;
+        const rect = chartCanvas.getBoundingClientRect();
+        const plotWidth = rect.width * ((chartCanvas.width - 108) / chartCanvas.width);
+        const panAmount = (event.clientX - chartPanStartX) / plotWidth;
+        chartZoomAnchorX = Math.max(0, Math.min(1, chartPanStartAnchorX - panAmount));
+        drawChart(latestState);
+      });
+      chartCanvas.addEventListener("pointerup", (event) => {
+        if (event.button !== 1 || !chartPanning) return;
+        chartPanning = false;
+        chartCanvas.releasePointerCapture(event.pointerId);
+        chartCanvas.style.cursor = chartZoomX > 1 || chartZoomY > 1 ? "zoom-out" : "zoom-in";
+      });
+    }
     document.getElementById("startAgents").addEventListener("click", startAgents);
     showIdleOffice();
     refresh().then(refreshHistory).finally(() => maybeAutostartAgents());

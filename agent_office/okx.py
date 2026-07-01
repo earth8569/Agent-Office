@@ -251,9 +251,23 @@ class OkxDemoAdapter:
         method = getattr(self.exchange, "private_get_trade_orders_algo_pending", None)
         if method is None:
             return []
-        response = method({"instType": "SWAP", "ordType": "conditional"})
-        data = response.get("data", []) if isinstance(response, dict) else []
-        return list(data)
+        # OKX returns attached TP/SL as OCO orders, while standalone stops are
+        # conditional orders. Query both so reconciliation can find native SLs.
+        orders: list[dict[str, Any]] = []
+        seen_ids: set[str] = set()
+        for order_type in ("conditional", "oco"):
+            response = method({"instType": "SWAP", "ordType": order_type})
+            data = response.get("data", []) if isinstance(response, dict) else []
+            for order in data:
+                if not isinstance(order, dict):
+                    continue
+                order_id = str(order.get("algoId") or order.get("ordId") or order.get("id") or "")
+                dedupe_key = order_id or repr(sorted(order.items()))
+                if dedupe_key in seen_ids:
+                    continue
+                seen_ids.add(dedupe_key)
+                orders.append(order)
+        return orders
 
 
 def _position_side_for_order(exchange: Any, side: Side) -> str:

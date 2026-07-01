@@ -42,6 +42,33 @@ class WebDashboardTests(unittest.TestCase):
         self.assertIn("is-complete", html)
         self.assertIn("AGENTS RUNNING", html)
 
+    def test_dashboard_chart_supports_mouse_wheel_zoom_and_middle_drag_pan(self) -> None:
+        path = _resolve_static_path("/reports/grid_pixel_dashboard.html")
+        self.assertIsNotNone(path)
+        html = path.read_text(encoding="utf-8")
+
+        self.assertIn('chartCanvas.addEventListener("wheel"', html)
+        self.assertIn("event.preventDefault();", html)
+        self.assertIn("chartZoomX = Math.max(1", html)
+        self.assertIn("chartZoomY = Math.max(1", html)
+        self.assertIn("chartZoomAnchorY", html)
+        self.assertIn('chartCanvas.addEventListener("pointerdown"', html)
+        self.assertIn('chartCanvas.addEventListener("pointermove"', html)
+        self.assertIn('chartCanvas.addEventListener("pointerup"', html)
+        self.assertIn("event.button !== 1", html)
+        self.assertIn("chartPanStartAnchorX - panAmount", html)
+
+    def test_dashboard_prioritizes_chart_space_over_demo_detail(self) -> None:
+        path = _resolve_static_path("/reports/grid_pixel_dashboard.html")
+        self.assertIsNotNone(path)
+        html = path.read_text(encoding="utf-8")
+
+        self.assertIn("grid-template-columns: minmax(0, 1.65fr) minmax(220px, 0.35fr);", html)
+        self.assertIn('<canvas id="pnlCanvas" width="1100" height="400">', html)
+        self.assertIn("grid-template-columns: repeat(2, minmax(0, 1fr)) !important;", html)
+        self.assertIn(".demo-detail-panel .metric .value", html)
+        self.assertIn("font-size: 14px;", html)
+
     def test_dashboard_symbol_pill_is_config_driven(self) -> None:
         path = _resolve_static_path("/reports/grid_pixel_dashboard.html")
         self.assertIsNotNone(path)

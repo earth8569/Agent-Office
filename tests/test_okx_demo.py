@@ -100,5 +100,39 @@ class FakeOkxExchange:
         return {"id": "demo-order-1", "info": {"ordId": "demo-order-1"}}
 
 
+class OkxOcoStopOrderTests(unittest.TestCase):
+    def test_fetch_open_stop_orders_recognizes_okx_oco_attached_stop(self) -> None:
+        exchange = OcoOnlyFakeOkxExchange()
+        adapter = OkxDemoAdapter(
+            OkxCredentials(api_key="key", api_secret="secret", passphrase="pass", demo=True),
+            exchange=exchange,
+        )
+
+        stops = adapter.fetch_open_stop_orders(("BTC/USDT:USDT",))
+
+        self.assertEqual(len(stops), 1)
+        self.assertEqual(stops[0].symbol, "BTC/USDT:USDT")
+        self.assertEqual(stops[0].order_id, "oco-1")
+        self.assertEqual(stops[0].stop_price, 63198.6)
+        self.assertEqual([request["ordType"] for request in exchange.algo_requests], ["conditional", "oco"])
+
+
+class OcoOnlyFakeOkxExchange(FakeOkxExchange):
+    def __init__(self) -> None:
+        super().__init__()
+        self.algo_requests: list[dict] = []
+
+    def private_get_trade_orders_algo_pending(self, params: dict) -> dict:
+        self.algo_requests.append(params)
+        if params.get("ordType") != "oco":
+            return {"data": []}
+        return {"data": [{
+            "algoId": "oco-1",
+            "instId": "BTC-USDT-SWAP",
+            "ordType": "oco",
+            "slTriggerPx": "63198.6",
+        }]}
+
+
 if __name__ == "__main__":
     unittest.main()

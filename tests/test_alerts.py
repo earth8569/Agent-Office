@@ -3,7 +3,10 @@ from __future__ import annotations
 import os
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 from uuid import uuid4
+from urllib.error import HTTPError
+from io import BytesIO
 
 from agent_office.alerts import TelegramResult, TelegramNotifier, agent_restart_keyboard, agent_stopped_message
 from agent_office.storage import SQLiteStore
@@ -41,6 +44,37 @@ class AlertsTests(unittest.TestCase):
         button = keyboard["inline_keyboard"][0][0]
         self.assertEqual(button["text"], "Restart agents")
         self.assertEqual(button["url"], "https://example.test/reports/grid_pixel_dashboard.html?x=1&autostart=1")
+
+    def test_telegram_notifier_reports_telegram_http_error_description(self) -> None:
+        notifier = TelegramNotifier(bot_token="token", chat_id="chat")
+        error_body = b'{"ok":false,"error_code":403,"description":"Forbidden: bot was blocked by the user"}'
+        error = HTTPError(
+            "https://api.telegram.org/bottoken/sendMessage",
+            403,
+            "Forbidden",
+            hdrs=None,
+            fp=BytesIO(error_body),
+        )
+
+        with patch("agent_office.alerts.request.urlopen", side_effect=error):
+            result = notifier.send_message("agents stopped")
+
+        self.assertTrue(result.enabled)
+        self.assertFalse(result.sent)
+        self.assertEqual(result.reason, "Forbidden: bot was blocked by the user")
+
+    def test_telegram_notifier_uses_bundled_certificates(self) -> None:
+        notifier = TelegramNotifier(bot_token="token", chat_id="chat")
+        response = FakeResponse(b'{"ok":true}')
+        ssl_context = object()
+
+        with patch("agent_office.alerts._telegram_ssl_context", return_value=ssl_context), patch(
+            "agent_office.alerts.request.urlopen", return_value=response
+        ) as urlopen:
+            result = notifier.send_message("agents stopped")
+
+        self.assertTrue(result.sent)
+        self.assertIs(urlopen.call_args.kwargs["context"], ssl_context)
 
     def test_notify_agents_stopped_sends_and_records_audit(self) -> None:
         store = self._store()
@@ -87,6 +121,20 @@ class FakeNotifier:
         self.messages.append(text)
         self.reply_markups.append(reply_markup)
         return TelegramResult(enabled=True, sent=True, reason="sent")
+
+
+class FakeResponse:
+    def __init__(self, body: bytes) -> None:
+        self.body = body
+
+    def __enter__(self) -> "FakeResponse":
+        return self
+
+    def __exit__(self, *_args: object) -> None:
+        return None
+
+    def read(self) -> bytes:
+        return self.body
 
 
 if __name__ == "__main__":
